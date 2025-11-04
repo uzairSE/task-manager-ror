@@ -17,12 +17,12 @@ module Api
         paginated_tasks = paginate(tasks)
         paginated_tasks = paginated_tasks.preload(:creator, :assignee)
 
-        render_success(paginated_tasks, serializer: V2::TaskSerializer, include: [ :creator, :assignee ])
+        render_success(paginated_tasks, serializer: ::V2::TaskSerializer, include: [ :creator, :assignee ])
       end
 
       def show
         authorize @task
-        render_success(@task, serializer: V2::TaskSerializer, include: [ :creator, :assignee, :comments ])
+        render_success(@task, serializer: ::V2::TaskSerializer, include: [ :creator, :assignee, :comments ])
       end
 
       def create
@@ -32,12 +32,12 @@ module Api
 
         if result.success?
           invalidate_dashboard_cache(current_user)
-          render_success(result.data, serializer: V2::TaskSerializer, status: :created)
+          render_success(result.data, serializer: ::V2::TaskSerializer, status: :created)
         else
           render_error(
-            code: "VALIDATION_ERROR",
-            message: "Task creation failed",
-            details: result.errors
+              code: "VALIDATION_ERROR",
+              message: "Task creation failed",
+              details: result.errors
           )
         end
       end
@@ -74,8 +74,8 @@ module Api
           {
             status_counts: status_counts,
             overdue_count: overdue_count,
-            assigned_incomplete_tasks: V2::TaskSerializer.new(assigned_incomplete, include: [ :creator ]).serializable_hash,
-            recent_activity: V2::TaskSerializer.new(recent_tasks, include: [ :creator, :assignee ]).serializable_hash
+            assigned_incomplete_tasks: ::V2::TaskSerializer.new(assigned_incomplete, include: [ :creator ]).serializable_hash,
+            recent_activity: ::V2::TaskSerializer.new(recent_tasks, include: [ :creator, :assignee ]).serializable_hash
           }
         end
 

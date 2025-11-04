@@ -12,15 +12,15 @@ module Api
           token = ensure_authentication_token(user)
           render_success(
             {
-              user: V2::UserSerializer.new(user).serializable_hash[:data],
+              user: ::V2::UserSerializer.new(user).serializable_hash[:data],
               token: token
             },
             status: :ok
           )
         else
           render_error(
-            code: "INVALID_CREDENTIALS",
-            message: "Invalid email or password",
+              code: "INVALID_CREDENTIALS",
+              message: "Invalid email or password",
             details: {},
             status: :unauthorized
           )
@@ -40,7 +40,7 @@ module Api
           token = user.generate_authentication_token!
           render_success(
             {
-              user: V2::UserSerializer.new(user).serializable_hash[:data],
+              user: ::V2::UserSerializer.new(user).serializable_hash[:data],
               token: token
             },
             status: :created

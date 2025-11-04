@@ -25,13 +25,13 @@ module Authenticatable
     if respond_to?(:render_error, true)
       render_error(code: "UNAUTHORIZED", message: message, details: {}, status: :unauthorized)
     else
-      render json: {
-        error: {
-          code: "UNAUTHORIZED",
+    render json: {
+      error: {
+        code: "UNAUTHORIZED",
           message: message,
-          details: {}
-        }
-      }, status: :unauthorized
+        details: {}
+      }
+    }, status: :unauthorized
     end
   end
 end

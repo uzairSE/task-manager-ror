@@ -3,11 +3,11 @@
 class TaskNotificationJob < ApplicationSidekiqJob
   sidekiq_options queue: :default, retry: 3
 
-  def perform(task_id, notification_type: "assignment")
+  def perform(task_id, notification_type = "assignment")
     task = Task.find_by(id: task_id)
     return unless task
 
-    case notification_type
+    case notification_type.to_s
     when "assignment"
       send_assignment_notification(task) if task.assignee
     when "completion"

@@ -17,12 +17,12 @@ module Api
         paginated_tasks = paginate(tasks)
         paginated_tasks = paginated_tasks.preload(:creator, :assignee)
 
-        render_success(paginated_tasks, serializer: TaskSerializer, include: [ :creator, :assignee ])
+        render_success(paginated_tasks, serializer: ::TaskSerializer, include: [ :creator, :assignee ])
       end
 
       def show
         authorize @task
-        render_success(@task, serializer: TaskSerializer, include: [ :creator, :assignee, :comments ])
+        render_success(@task, serializer: ::TaskSerializer, include: [ :creator, :assignee, :comments ])
       end
 
       def create
@@ -32,12 +32,12 @@ module Api
 
         if result.success?
           invalidate_dashboard_cache(current_user)
-          render_success(result.data, serializer: TaskSerializer, status: :created)
+          render_success(result.data, serializer: ::TaskSerializer, status: :created)
         else
           render_error(
-            code: "VALIDATION_ERROR",
-            message: "Task creation failed",
-            details: result.errors
+              code: "VALIDATION_ERROR",
+              message: "Task creation failed",
+              details: result.errors
           )
         end
       end
@@ -47,7 +47,7 @@ module Api
 
         if @task.update(task_params)
           invalidate_dashboard_cache(current_user)
-          render_success(@task, serializer: TaskSerializer)
+          render_success(@task, serializer: ::TaskSerializer)
         else
           render_validation_error(@task)
         end
@@ -74,12 +74,12 @@ module Api
 
         if result.success?
           invalidate_dashboard_cache(current_user)
-          render_success(result.data, serializer: TaskSerializer)
+          render_success(result.data, serializer: ::TaskSerializer)
         else
           render_error(
-            code: "ASSIGNMENT_ERROR",
-            message: "Task assignment failed",
-            details: result.errors
+              code: "ASSIGNMENT_ERROR",
+              message: "Task assignment failed",
+              details: result.errors
           )
         end
       end
@@ -91,12 +91,12 @@ module Api
 
         if result.success?
           invalidate_dashboard_cache(current_user)
-          render_success(result.data, serializer: TaskSerializer)
+          render_success(result.data, serializer: ::TaskSerializer)
         else
           render_error(
-            code: "COMPLETION_ERROR",
-            message: "Task completion failed",
-            details: result.errors
+              code: "COMPLETION_ERROR",
+              message: "Task completion failed",
+              details: result.errors
           )
         end
       end
@@ -139,8 +139,8 @@ module Api
           {
             status_counts: status_counts,
             overdue_count: overdue_count,
-            assigned_incomplete_tasks: TaskSummarySerializer.new(assigned_incomplete, include: [ :creator ]).serializable_hash,
-            recent_activity: TaskSummarySerializer.new(recent_tasks, include: [ :creator, :assignee ]).serializable_hash
+            assigned_incomplete_tasks: ::TaskSummarySerializer.new(assigned_incomplete, include: [ :creator ]).serializable_hash,
+            recent_activity: ::TaskSummarySerializer.new(recent_tasks, include: [ :creator, :assignee ]).serializable_hash
           }
         end
 
@@ -153,7 +153,7 @@ module Api
         paginated_tasks = paginate(tasks)
         paginated_tasks = paginated_tasks.preload(:creator, :assignee)
 
-        render_success(paginated_tasks, serializer: TaskSerializer, include: [ :creator, :assignee ])
+        render_success(paginated_tasks, serializer: ::TaskSerializer, include: [ :creator, :assignee ])
       end
 
       private

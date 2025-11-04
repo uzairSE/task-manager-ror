@@ -11,19 +11,19 @@ module Api
         users = users.where(role: params[:role]) if params[:role].present?
 
         paginated_users = paginate(users)
-        render_success(paginated_users, serializer: UserSerializer)
+        render_success(paginated_users, serializer: ::UserSerializer)
       end
 
       def show
         authorize @user
-        render_success(@user, serializer: UserSerializer)
+        render_success(@user, serializer: ::UserSerializer)
       end
 
       def update
         authorize @user
 
         if @user.update(user_params)
-          render_success(@user, serializer: UserSerializer)
+          render_success(@user, serializer: ::UserSerializer)
         else
           render_validation_error(@user)
         end

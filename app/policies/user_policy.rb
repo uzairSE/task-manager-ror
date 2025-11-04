@@ -39,6 +39,10 @@ class UserPolicy < ApplicationPolicy
     user&.admin?
   end
 
+  def manager?
+    user&.manager?
+  end
+
   def user_self?
     record.id == user.id
   end

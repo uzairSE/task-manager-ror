@@ -11,7 +11,7 @@ module Api
         paginated_comments = paginate(comments)
         paginated_comments = paginated_comments.preload(:user)
 
-        render_success(paginated_comments, serializer: CommentSerializer, include: [ :user ])
+        render_success(paginated_comments, serializer: ::CommentSerializer, include: [ :user ])
       end
 
       def create
@@ -19,7 +19,7 @@ module Api
         comment.user = current_user
 
         if comment.save
-          render_success(comment, serializer: CommentSerializer, status: :created, include: [ :user ])
+          render_success(comment, serializer: ::CommentSerializer, status: :created, include: [ :user ])
         else
           render_validation_error(comment)
         end
