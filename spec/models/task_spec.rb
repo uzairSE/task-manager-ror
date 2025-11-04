@@ -174,8 +174,8 @@ RSpec.describe Task, type: :model do
       expect(task.save).to be true
       expect(task.id).to be_present
       task.reload
-      expect(task.status).to eq('pending')
-    end
+        expect(task.status).to eq('pending')
+      end
 
     it 'preserves explicitly set status' do
         task = build(:task, status: :in_progress)

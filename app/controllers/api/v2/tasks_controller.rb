@@ -47,37 +47,37 @@ module Api
 
         # Use Redis caching for expensive aggregations
         dashboard_data = fetch_cached_dashboard_data(current_user) do
-          # Optimized queries to prevent N+1
-          tasks_scope = policy_scope(Task)
+        # Optimized queries to prevent N+1
+        tasks_scope = policy_scope(Task)
 
-          # Total tasks count by status - cached for 5 minutes
-          status_counts = tasks_scope.group(:status).count
+        # Total tasks count by status - cached for 5 minutes
+        status_counts = tasks_scope.group(:status).count
 
-          # Overdue tasks count - cached for 5 minutes
-          overdue_count = tasks_scope.overdue.count
+        # Overdue tasks count - cached for 5 minutes
+        overdue_count = tasks_scope.overdue.count
 
-          # User's assigned incomplete tasks with creator info (no N+1)
-          # Cache for 2 minutes as this changes more frequently
-          assigned_incomplete = tasks_scope
-            .where(assignee_id: current_user.id)
-            .where.not(status: :completed)
+        # User's assigned incomplete tasks with creator info (no N+1)
+        # Cache for 2 minutes as this changes more frequently
+        assigned_incomplete = tasks_scope
+          .where(assignee_id: current_user.id)
+          .where.not(status: :completed)
             .preload(:creator)
-            .limit(10)
+          .limit(10)
 
-          # Recent activity (last 10 tasks with assignee and creator, no N+1)
-          # Cache for 2 minutes as this changes more frequently
-          recent_tasks = tasks_scope
-            .recent
+        # Recent activity (last 10 tasks with assignee and creator, no N+1)
+        # Cache for 2 minutes as this changes more frequently
+        recent_tasks = tasks_scope
+          .recent
             .preload(:creator, :assignee)
-            .limit(10)
+          .limit(10)
 
           {
             status_counts: status_counts,
             overdue_count: overdue_count,
             assigned_incomplete_tasks: ::V2::TaskSerializer.new(assigned_incomplete, include: [ :creator ]).serializable_hash,
             recent_activity: ::V2::TaskSerializer.new(recent_tasks, include: [ :creator, :assignee ]).serializable_hash
-          }
-        end
+        }
+      end
 
         render json: { data: dashboard_data }
       end

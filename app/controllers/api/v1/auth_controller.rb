@@ -35,6 +35,7 @@ module Api
 
       def signup
         user = User.new(user_params)
+        user.role ||= :member
 
         if user.save
           token = user.generate_authentication_token!
@@ -75,7 +76,7 @@ module Api
       end
 
       def user_params
-        params.permit(:email, :password, :password_confirmation, :first_name, :last_name, :role)
+        params.permit(:email, :password, :password_confirmation, :first_name, :last_name)
       end
 
       def reset_password_params
