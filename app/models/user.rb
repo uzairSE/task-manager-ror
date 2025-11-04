@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  enum role: { admin: 0, manager: 1, member: 2 }
+  enum :role, { admin: 0, manager: 1, member: 2 }
 
   has_many :created_tasks, class_name: "Task", foreign_key: "creator_id", dependent: :destroy
   has_many :assigned_tasks, class_name: "Task", foreign_key: "assignee_id", dependent: :nullify
@@ -15,6 +15,10 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, presence: true
+
+  def full_name
+    "#{first_name} #{last_name}".strip
+  end
 
   def generate_authentication_token!
     loop do

@@ -8,8 +8,8 @@ A RESTful API for managing tasks with role-based access control, built with Rail
 
 - Ruby 3.2+
 - Rails 8.1+
-- SQLite3
-- Redis (for Sidekiq)
+- PostgreSQL 12+ (required for optimal performance)
+- Redis (for Sidekiq and caching)
 
 ### Installation
 
@@ -23,10 +23,21 @@ A RESTful API for managing tasks with role-based access control, built with Rail
 3. Set up the database:
 
    ```bash
-   rails db:create
+   # Create PostgreSQL database (if not already created)
+   createdb task_management_system_development
+   createdb task_management_system_test
+   
+   # Run migrations
    rails db:migrate
    rails db:seed
    ```
+
+   **Note:** This application uses PostgreSQL instead of SQLite3 for better performance. PostgreSQL provides:
+   - Superior query optimization for complex queries and joins
+   - Better concurrent access handling
+   - Advanced indexing capabilities (composite indexes, partial indexes)
+   - Better performance with large datasets
+   - Production-ready features like full-text search, JSON support, and more
 
 4. Start Redis:
 
@@ -81,7 +92,7 @@ A RESTful API for managing tasks with role-based access control, built with Rail
 - `POST /api/v1/tasks/:task_id/comments` - Create a comment
 - `DELETE /api/v1/tasks/:task_id/comments/:id` - Delete a comment
 
-## Authentication -
+## Authentication-
 
 All API requests (except auth endpoints) require an authentication token in the header:
 
@@ -196,23 +207,48 @@ The application uses Sidekiq for background job processing:
 
 ## Environment Variables
 
-Create a `.env` file (see `.env.example`):
+Create a `.env` file from `.env.example` and configure the required environment variables.
 
-```bash
-REDIS_URL=redis://localhost:6379/0
-```
+## Performance Optimizations
+
+This application includes several performance optimizations:
+
+### Database
+
+- **PostgreSQL** is used instead of SQLite3 for better performance with complex queries and concurrent access
+- **Composite indexes** are strategically placed on frequently queried columns:
+  - `tasks(status, assignee_id)` - for policy scope queries
+  - `tasks(assignee_id, status)` - for assigned tasks filtering
+  - `tasks(creator_id, status)` - for created tasks filtering
+  - `tasks(status, due_date)` - for overdue queries
+  - `tasks(priority, status)` - for high priority queries
+  - `comments(task_id, created_at)` - for ordered comments
+
+### Caching
+
+- **Redis caching** is implemented for the dashboard endpoint
+  - Dashboard statistics are cached for 5 minutes
+  - Cache is automatically invalidated on task create/update/delete
+  - Cache keys are role-aware to ensure proper data isolation
+
+### Query Optimization
+
+- **Eager loading** is optimized using `preload` for associations not used in WHERE clauses
+- **N+1 query prevention** through strategic use of `includes` and `preload`
+- **Batch processing** in background jobs using `find_each` with appropriate batch sizes
+- **Service objects** are wrapped in database transactions for data consistency
+
+### For Background Jobs
+
+- **TaskArchivalJob** uses `update_all` for batch updates instead of individual saves
+- **DataExportJob** streams CSV generation to avoid loading all records in memory
+- **TaskReminderJob** uses optimized queries with proper indexes and preloading
+
+### Monitoring
+
+- **Bullet gem** is configured to detect N+1 queries in development and test environments
+- Performance tests verify query counts and response times
 
 ## Sidekiq Web UI
 
 Access Sidekiq web interface at: `http://localhost:3000/sidekiq`
-
-### Relationships -
-
-- **User** has_many **Tasks** (as creator)
-- **User** has_many **Tasks** (as assignee)
-- **User** has_many **Comments**
-- **Task** belongs_to **User** (creator)
-- **Task** belongs_to **User** (assignee, optional)
-- **Task** has_many **Comments**
-- **Comment** belongs_to **Task**
-- **Comment** belongs_to **User**

@@ -10,13 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_04_160813) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_04_170000) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
     t.integer "task_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["created_at"], name: "index_comments_on_created_at"
+    t.index ["task_id", "created_at"], name: "index_comments_on_task_id_and_created_at"
     t.index ["task_id"], name: "index_comments_on_task_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
@@ -32,12 +37,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_04_160813) do
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["assignee_id", "status"], name: "index_tasks_on_assignee_id_and_status"
     t.index ["assignee_id"], name: "index_tasks_on_assignee_id"
     t.index ["completed_at"], name: "index_tasks_on_completed_at"
     t.index ["created_at"], name: "index_tasks_on_created_at"
+    t.index ["creator_id", "status"], name: "index_tasks_on_creator_id_and_status"
     t.index ["creator_id"], name: "index_tasks_on_creator_id"
     t.index ["due_date"], name: "index_tasks_on_due_date"
+    t.index ["priority", "status"], name: "index_tasks_on_priority_and_status"
     t.index ["priority"], name: "index_tasks_on_priority"
+    t.index ["status", "assignee_id"], name: "index_tasks_on_status_and_assignee_id"
+    t.index ["status", "due_date"], name: "index_tasks_on_status_and_due_date"
     t.index ["status"], name: "index_tasks_on_status"
   end
 

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Task < ApplicationRecord
-  enum status: { pending: 0, in_progress: 1, completed: 2, archived: 3 }, default: :pending
-  enum priority: { low: 0, medium: 1, high: 2, urgent: 3 }, default: :low
+  enum :status, { pending: 0, in_progress: 1, completed: 2, archived: 3 }
+  enum :priority, { low: 0, medium: 1, high: 2, urgent: 3 }
 
-  belongs_to :creator, class_name: "User", foreign_key: "creator_id", counter_cache: true
-  belongs_to :assignee, class_name: "User", foreign_key: "assignee_id", optional: true, counter_cache: true
+  belongs_to :creator, class_name: "User", foreign_key: "creator_id", counter_cache: :created_tasks_count
+  belongs_to :assignee, class_name: "User", foreign_key: "assignee_id", optional: true, counter_cache: :assigned_tasks_count
   has_many :comments, dependent: :destroy
 
   validates :title, presence: true
