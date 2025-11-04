@@ -41,6 +41,12 @@ class TaskPolicy < ApplicationPolicy
     admin? || manager? || owns_task? || assigned_to_task?
   end
 
+  def export?
+    return false unless user.present?
+
+    admin? || manager? || owns_task? || assigned_to_task?
+  end
+
   def overdue?
     user.present?
   end

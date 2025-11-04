@@ -20,7 +20,7 @@ module ApiRespondable
     end
   end
 
-  def render_error(code:, message:, details: {}, status: :unprocessable_entity)
+  def render_error(code:, message:, details: {}, status: :unprocessable_content)
     render json: {
       error: {
         code: code.to_s.upcase,
@@ -35,11 +35,20 @@ module ApiRespondable
       code: "VALIDATION_ERROR",
       message: "Validation failed",
       details: record.errors.full_messages,
-      status: :unprocessable_entity
+      status: :unprocessable_content
     )
   end
 
-  def render_not_found(resource: "Resource")
+  def render_not_found(exception = nil, resource: nil)
+    if exception.is_a?(ActiveRecord::RecordNotFound)
+      model_name = exception.model
+      if model_name.nil? && exception.message
+        match = exception.message.match(/Couldn't find (\w+)/)
+        model_name = match[1] if match
+      end
+      resource = model_name if model_name
+    end
+    resource ||= "Resource"
     render_error(
       code: "NOT_FOUND",
       message: "#{resource} not found",
@@ -57,7 +66,8 @@ module ApiRespondable
     )
   end
 
-  def render_forbidden(message: "You are not authorized to perform this action")
+  def render_forbidden(exception = nil, message: nil)
+    message ||= "You are not authorized to perform this action"
     render_error(
       code: "FORBIDDEN",
       message: message,

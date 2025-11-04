@@ -4,6 +4,13 @@ SimpleCov.start 'rails' do
   add_filter '/spec/'
   add_filter '/config/'
   add_filter '/vendor/'
+  add_filter '/db/migrate/'
+  add_filter '/db/schema.rb'
+  add_filter '/app/mailers/'
+  add_filter '/app/helpers/'
+  add_filter '/lib/tasks/'
+  # Exclude initializers that are configuration-only
+  add_filter '/config/initializers/'
   minimum_coverage 90
 end
 
@@ -104,4 +111,11 @@ RSpec.configure do |config|
       with.library :rails
     end
   end
+
+  # JSON response helper for request specs
+  config.include Module.new {
+    def json_response
+      JSON.parse(response.body)
+    end
+  }, type: :request
 end
